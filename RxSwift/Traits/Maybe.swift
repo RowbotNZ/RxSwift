@@ -130,7 +130,7 @@ public extension PrimitiveSequenceType where TraitType == MaybeTrait {
      - seealso: [just operator on reactivex.io](http://reactivex.io/documentation/operators/just.html)
      
      - parameter element: Single element in the resulting observable sequence.
-     - parameter: Scheduler to send the single element on.
+     - parameter scheduler: Scheduler to send the single element on.
      - returns: An observable sequence containing the single specified element.
      */
     public static func just(_ element: ElementType, scheduler: ImmediateSchedulerType) -> Maybe<ElementType> {
@@ -276,5 +276,18 @@ public extension PrimitiveSequenceType where TraitType == MaybeTrait {
      */
     public func ifEmpty(switchTo other: Single<ElementType>) -> Single<ElementType> {
         return Single(raw: primitiveSequence.source.ifEmpty(switchTo: other.primitiveSequence.source))
+    }
+
+    /**
+     Continues an observable sequence that is terminated by an error with a single element.
+
+     - seealso: [catch operator on reactivex.io](http://reactivex.io/documentation/operators/catch.html)
+
+     - parameter element: Last element in an observable sequence in case error occurs.
+     - returns: An observable sequence containing the source sequence's elements, followed by the `element` in case an error occurred.
+     */
+    public func catchErrorJustReturn(_ element: ElementType)
+        -> PrimitiveSequence<TraitType, ElementType> {
+        return PrimitiveSequence(raw: primitiveSequence.source.catchErrorJustReturn(element))
     }
 }

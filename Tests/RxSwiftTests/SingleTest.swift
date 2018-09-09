@@ -245,6 +245,19 @@ extension SingleTest {
             ])
     }
 
+    func test_catchErrorJustReturn() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single.error(testError).catchErrorJustReturn(2) as Single<Int>).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .next(200, 2),
+            .completed(200)
+        ])
+    }
+
     func test_retry() {
         let scheduler = TestScheduler(initialClock: 0)
 
@@ -532,6 +545,68 @@ extension SingleTest {
         XCTAssertEqual(res.events, [
             .next(200, 2),
             .completed(200)
+            ])
+    }
+
+    func test_flatMapMaybe() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(1).flatMapMaybe { Maybe.just($0 * 2) } as Maybe<Int>).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .next(200, 2),
+            .completed(200)
+            ])
+    }
+
+    func test_flatMapCompletable() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(10).flatMapCompletable { _ in Completable.empty() } as Completable).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .completed(200)
+            ])
+    }
+
+    func test_asMaybe() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(1).asMaybe() as Maybe<Int>).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .next(200, 1),
+            .completed(200)
+            ])
+    }
+
+    func test_asCompletable() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.just(5).asCompletable() as Completable).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .completed(200)
+            ])
+    }
+
+    func test_asCompletableError() {
+        let scheduler = TestScheduler(initialClock: 0)
+
+        let res = scheduler.start {
+            (Single<Int>.error(testError).asCompletable() as Completable).asObservable()
+        }
+
+        XCTAssertEqual(res.events, [
+            .error(200, testError)
             ])
     }
 }
